@@ -1,77 +1,145 @@
+FÓRMULAS QUE PUEDEN SERVIR PARA EL TRABAJO:
+
+Siempre empezamos aqui porque son los primeros pasos mas tipicos
+
+datos <- read.csv("archivo.csv", sep=",", dec=".", header=TRUE)  # Cargar tabla (CSV)
+head(datos) # Primeras filas (para ver si se cargó bien)
+summary(datos)  # Resumen: min, max, mean, median, etc
+dim(datos) # Filas x columnas
+str(datos) # Estructura. MUY importante para ver factores y tipos
+View(datos) # Abre la tabla en modo “Excel”
+names(datos) # Nombres de columnas rápido
+colnames(datos) # Lo mismo, pero más largo
 datos <- read.csv("archivo.csv", sep=",", dec=".", header=TRUE)  # cargar tabla (csv)
 head(datos) # primeras filas
 summary(datos) # resumen: min, max, mean, etc
 dim(datos) # filas x columnas
 str(datos) # tipos de datos (muy importante para factores)
 
-Eso lo solemos hacer de los primeros pasos para ver si está todo bien cargado
+
+Carpeta de trabajo 
+
+getwd() # Saber en qué carpeta estás
+setwd("C:/Carpeta/Proyecto") # Cambiar de carpeta (si hace falta)
 
 
-datos$Tratamiento <- factor(datos$Tratamiento) # para que R entienda que no es texto normal o va a dar error
+
+Limpieza de datos
+
+datos <- na.omit(datos) # Quitar filas con NA si no te importa perderlas
+datos <- unique(datos) # Quitar filas duplicadas
+colSums(is.na(datos)) # Ver cuántos NA hay por columna
 
 
-abe <- subset(datos, Tratamiento == "abe") # == es para COMPARAR COSAS
-cde <- subset(datos, Tratamiento == "cde")
-xyz <- subset(datos, Tratamiento == "xyz")
-Nos va a dejar solo las filas que cumplen. OJO para trabajo
+Factores
 
-aggregate(Glucosa ~ Tratamiento, data=datos, FUN=mean) # lo ponemos apra las medias
-aggregate(Glucosa ~ Tratamiento, data=datos, FUN=sd) # para las desviaciones E.
+datos$X <- factor(datos$X) # Convertir texto a factor
+levels(datos$X) # Ver niveles del factor
+datos$X <- factor(datos$X,  # Cambiar orden de niveles
+                  levels=c("control","abe","cde","xyz"))
 
-hist(datos$Lo_que_nos_interese, col="el que sea", main="Lo_que_nos_interese")
 
-boxplot(X ~ Y, data=datos) # En todo cambiamos los nombres de las variables según lo que te interese buscar. GENERALMENTE SON X E Y
 
+Filtrar datos
+subset(datos, X == "abe") # Filtrar por condición
+subset(datos, X == "abe" & Y > 100) # Y (ambas condiciones)
+subset(datos, X == "abe" | X == "cde")  # O (una de las dos)
+"abe" %in% datos$X # Comprobar si existe ese valor
+
+
+
+Seleccionar columnas y files
+
+datos[ , 2:4] # Seleccionar columnas por número
+unique(datos$X) # Valores únicos
+
+
+Resúmenes útiles
+
+table(datos$X) # Conteo
+prop.table(table(datos$X)) * 100 # Porcentajes
+cor(datos$x, datos$y, use="complete.obs") # Correlación
+
+Estadísttica
+
+t.test(Y ~ X, data=datos) # Comparar dos grupos
+anova(lm(Y ~ X, data=datos)) # ANOVA para más grupos
+aggregate(Y ~ X, data=datos, FUN=mean) # Medias por grupo
+aggregate(Y ~ X, data=datos, FUN=sd)   # Desviaciones estándar
+
+
+
+Columnas nuevas
+datos$nuevo <- datos$Y * 2 # Crear columna nueva por cálculo
+
+
+
+Crear grupos
+
+datos$GrupoY <- cut(datos$Y,
+                    breaks=c(0,100,200),
+                    labels=c("Bajo","Alto"))
+
+
+Renombrar columnas
+
+colnames(datos)[colnames(datos)=="Y"] <- "VariableY"
+
+
+
+Ordenar datos
+
+datos_ordenados <- datos[order(datos$Y), ] # Ascendente
+datos_ordenados <- datos[order(-datos$Y), ]  # Descendente
+
+
+
+Gráficos
+
+hist(datos$Y, col="red", main="Titulo")
+boxplot(Y ~ X, data=datos)
 library(vioplot)
-vioplot(X ~ Y, data=datos) # Más de lo mismo. Haces como el de arriba. Se parece al boxplot pero le cambia un poco la forma
+vioplot(Y ~ X, data=datos)
+plot(x, y)
+plot(datos$X, datos$Y)  # Si está dentro de tabla
+plot(datos$X, datos$Y,
+     main="Nombre del gráfico",
+     xlab="Nombre eje X",
+     ylab="Nombre eje Y")
+plot(datos$Y ~ datos$X,
+     col=datos$X)
+legend("topright",
+       legend=levels(datos$X),
+       col=1:length(levels(datos$X)),
+       pch=1)
+barplot(table(datos$X))
 
 
-# Si queremos hacer un GRÁFICO DE DISPERSIÓN podemos:
-1- plot(x, y) 
 
-2- plot(tabla$X, tabla$Y) # Si lo tenemos en una tabla (los datos)
-
-3- # Hacerlo con etiquetas:
-plot(tabla$X, tabla$Y,
-main = "Nombre del gráfico",
-xlab = "Nombre del eje X",
-ylab = "Nombre del eje Y")
-
-# Si quieremos poner ponerle leyendas: legend("bottomright",
-legend = unique(tabla$grupo),
-col = 1:length(unique(tabla$grupo)),
-# El "bottomright" puede ser "topleft", "topright"...
-
-# Otra opción es usar:
-ggplot(tabla, aes(x = X, y = Y)) +
-
-# Si quisiesemos hacer un grafico distinto para cada grupo:
-ggplot(tabla, aes(X, Y)) +
-geom_point() +
-facet_grid(. ~ grupo)
+ggplot cuando quieres algo más decente 
+library(ggplot2)
+ggplot(datos, aes(x = X, y = Y)) +
+  geom_point()
 
 
-View(datos) # lo abre en modo Excel
-names(datos) # nombre de columnas rápido
-colnames(datos) # lo mismo pero más largo
+Gráfico por grupo 
 
-# Cambiamos orden de factores
-datos$Tratamiento <- factor(datos$Tratamiento,
-                            levels = c("control","abe","cde","xyz"))
+ggplot(datos, aes(X, Y)) +
+  geom_point() +
+  facet_grid(. ~ grupo)
 
-# Sacar correlaciones
-cor(datos$x, datos$y, use="complete.obs")
 
-# Exportar una tabla
-write.csv(datos, "salida.csv", row.names = FALSE)
+Guardar y exportar
 
-# Ayuda
+write.csv(datos, "salida.csv", row.names=FALSE) # Exportar tabla limpia
+save(datos, file="datos.RData") # Guardar objeto en R
+load("datos.RData") # Cargarlo otra vez
+
+
+AYUDA
 ?plot
 help(aggregate)
 
-#  Porcentaje y ordenadr datos
-prop.table(table(datos$Tratamiento)) * 100
-datos_ordenados <- datos[order(datos$Glucosa), ]
-datos_ordenados <- datos[order(-datos$Glucosa), ]
+
 
 
