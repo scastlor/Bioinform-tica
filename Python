@@ -1,1 +1,184 @@
+CÓDGIO IMPORTANTE PARA EL TRABAJO
+
+Importar librerias basicas
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+Cargar datos y primeros pasos
+
+df = pd.read_csv("archivo.csv") # Cargar tabla (CSV)
+df.head() # Primeras filas (para ver si se cargo bien)
+df.info() # Tipos de datos, NAs, etc
+df.describe() # Resumen numerico: min, max, mean, etc
+df.shape # Filas x columnas
+df.columns # Nombres de columnas
+
+
+
+Carpeta de trabajo
+
+import os
+os.getcwd() # Ver donde estas
+os.chdir("C:/Carpeta/Proyecto") # Cambiar de carpeta
+
+
+Ver algunas filas concretas
+
+df.head(10) # Primeras 10
+df.tail(10) # Ultimas 10
+
+
+Seleccionar columnas
+
+df["X"] # Una columna
+df[["X", "Y"]] # Varias columnas
+
+
+
+eleccionar filas por posicion
+df.iloc[0] # Primera fila
+df.iloc[0:5] # Filas de la 0 a la 4
+
+
+Filtrar datos (condiciones)
+
+df[df["X"] == "abe"] # Como subset(X == "abe")
+df[(df["X"] == "abe") & (df["Y"] > 100)] # Y
+df[(df["X"] == "abe") | (df["X"] == "cde")] # O
+"abe" in df["X"].values # Ver si "abe" esta en X
+
+
+
+Valores unicos y conteos
+
+df["X"].unique() # Valores unicos
+df["X"].value_counts() # Conteo por categoria
+df["X"].value_counts(normalize=True) * 100  # Porcentajes
+
+
+
+NA y limpieza basica
+
+df.isna().sum() # Ver cuantos NA hay por columna
+df = df.dropna() # Quitar filas con NA (si no te importan)
+# df = df.fillna(0) # Otra opcion, rellenar NAs con 0
+
+
+Quitar duplicados
+df = df.drop_duplicates()
+
+
+Crear columna nueva
+df["nuevo"] = df["Y"] * 2 # Este para calcular rápido
+
+
+Convertir a categoria 
+
+df["X"] = df["X"].astype("category")
+df["X"].cat.categories # Ver categorias
+df["X"].cat.reorder_categories(["control","abe","cde","xyz"], ordered=True, inplace=True)
+
+
+Renombrar columnas
+df = df.rename(columns={"Y": "VariableY"})
+
+
+Ordenar datos
+
+df_ordenado = df.sort_values(by="Y") # Ascendente
+df_ordenado_desc = df.sort_values(by="Y", ascending=False) # Descendente
+
+
+
+Agrupar y sacar medias y desviaciones 
+
+df.groupby("X")["Y"].mean() # Media por grupo
+df.groupby("X")["Y"].std() # Desviacion estandar por grupo
+
+
+
+Crear grupos/cortes automaticos 
+df["GrupoY"] = pd.cut(df["Y"],
+                      bins=[0, 100, 200],
+                      labels=["Bajo", "Alto"])
+
+
+Correlacion
+df[["x", "y"]].corr()
+
+
+
+Estadistica basica con scipy 
+from scipy import stats
+
+# ttest de dos grupos (Y ~ X)
+grupo1 = df[df["X"] == "abe"]["Y"]
+grupo2 = df[df["X"] == "cde"]["Y"]
+stats.ttest_ind(grupo1, grupo2, equal_var=False)
+
+
+Guardar y cargar datos
+
+df.to_csv("salida.csv", index=False) # Guardar tabla limpia a CSV
+
+# Guardar objeto completo de Python
+import pickle
+with open("datos.pkl", "wb") as f:
+    pickle.dump(df, f)
+
+with open("datos.pkl", "rb") as f:
+    df2 = pickle.load(f)
+
+
+Histograma
+
+plt.hist(df["Y"])
+plt.title("Histograma Y")
+plt.xlabel("Y")
+plt.ylabel("Frecuencia")
+plt.show()
+
+
+Boxplot
+plt.boxplot([df[df["X"]=="abe"]["Y"],
+             df[df["X"]=="cde"]["Y"],
+             df[df["X"]=="xyz"]["Y"]],
+            labels=["abe","cde","xyz"])
+plt.ylabel("Y")
+plt.show()
+
+
+
+Violin plot
+sns.violinplot(data=df, x="X", y="Y")
+plt.show()
+
+
+
+Grafico de dispersion simple
+
+plt.scatter(df["X"], df["Y"])   # Si X es numerica
+plt.xlabel("X")
+plt.ylabel("Y")
+plt.show()
+
+
+
+
+Scatter con colores por grupo
+sns.scatterplot(data=df, x="X", y="Y", hue="grupo")
+plt.show()
+
+
+Ayuda rapida
+help(pd.DataFrame) # Ayuda sobre dataframes
+help(df.head) # Ayuda de un metodo concreto
+
+
+
+
 
