@@ -68,3 +68,10 @@ write.csv(datos, "salida.csv", row.names = FALSE)
 # Ayuda
 ?plot
 help(aggregate)
+
+#  Porcentaje y ordenadr datos
+prop.table(table(datos$Tratamiento)) * 100
+datos_ordenados <- datos[order(datos$Glucosa), ]
+datos_ordenados <- datos[order(-datos$Glucosa), ]
+
+
